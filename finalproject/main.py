@@ -16,3 +16,18 @@ class Card:
         self.value_of_card = self._get_type_of_card(result)
         return self.value_of_card
 
+class Shoe:
+    def __init__(self, number_of_decks=6):
+            self.number_of_decks = number_of_decks
+            self.cards = []
+            self.create_shoe()
+
+    def create_shoe(self):
+            ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "j", "Q", "K"]
+            suits = ["♠️", "♦️", "❤️", "♣️"]
+            self.cards = []
+            for deck in range(self.number_of_decks):
+                for rank in ranks:
+                    for suit in suits:
+                        self.cards.append(Card(rank, suit))
+
