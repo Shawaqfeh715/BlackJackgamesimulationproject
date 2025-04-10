@@ -1,6 +1,3 @@
-import random
-
-
 class Card:
     cards = {"Jack": 10, "King": 10, "Queen": 10,
              "10": 10, "9": 9, "8": 8, "7": 7, "6": 6,
@@ -18,14 +15,6 @@ class Card:
     def get_value_of_card(self, result):
         self.value_of_card = self._get_type_of_card(result)
         return self.value_of_card
-
-class Deck:
-    def __init__(self):
-        self.cards = 
-
-    def shuffle(self):
-        random.shuffle(self.cards)
-
 
 class Shoe:
     def __init__(self, number_of_decks=6):
