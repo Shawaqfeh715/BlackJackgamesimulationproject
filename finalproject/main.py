@@ -37,8 +37,12 @@ class Shoe:
 
     def create_shoe(self):
             ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "j", "Q", "K"]
+            # I don't think we need the suits, because the suits are irrelevant in blackjack since they all
+            # can have the same value in each suit.
+            # what do you think?
             suits = ["♠️", "♦️", "❤️", "♣️"]
             self.cards = []
+
             for deck in range(self.number_of_decks):
                 for rank in ranks:
                     for suit in suits:
