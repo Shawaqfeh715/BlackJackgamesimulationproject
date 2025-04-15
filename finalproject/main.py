@@ -1,23 +1,13 @@
 import random
 
-
-SUITS = ["Diamonds", "Hearts". "Spades", "Clubs"]
-RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
-VALUES = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-          '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11}
-
-
 class Card:
+    cards = {"Jack": 10, "King": 10, "Queen": 10,
+             "10": 10, "9": 9, "8": 8, "7": 7, "6": 6,
+             "5": 5, "4": 4, "3": 3, "2": 2, "Ace": 1}
 
-
-    def __init__(self, suit, rank):
-        self.suit = suit
-        self.rank = rank
-        self.value = VALUES[rank]
-
-    #repr function returns string representation
-    def __repr__(self):
-        return f"{self.rank} of {self.suit}"
+    def __init__(self):
+        self.value_of_card = 0
+        self.type_of_card = ""
 
     def _get_type_of_card(self, result):
         if result in self.cards:
@@ -29,82 +19,75 @@ class Card:
         return self.value_of_card
 
 class Deck:
-    def __init__(self):
-        self.cards =[]
-        for suits in SUITS:
-            for rank in RANKS:
-                self.cards.append(Card(suit, rank))
-
-
       def __int__(self):
           self.deck=[]
 
       def make_deck(self):
           card=Card()
           card.type_of_card=random.randint(1,10)
-          for i in range(53):
+          for i in range(1,53):
               self.deck.append(card)
 
 class Shoe:
-    def __init__(self, number_of_decks=6):
-            self.number_of_decks = number_of_decks
-            self.cards = []
-            self.create_shoe()
+
+    def __init__(self):
+            self.number_of_decks = 6
+            self.shoe = []
+            self.card_count=0
 
     def create_shoe(self):
-
-            self.cards = []
-            for card in range(self.number_of_decks):
-                deck = Deck()
-                self.cards.extend(deck.cards)
-            self.shuffle()
+        deck=Deck()
+        for i in range(self.number_of_decks):
+            deck.make_deck()
+            self.shoe.append(deck)
 
     def shuffle(self):
-        random.shuffle(self.cards)
+        for j_deck in enumerate(self.shoe):
+            self.card_count+=len(self.shoe[j_deck])
+        if self.card_count<100:
+           self.create_shoe()
 
-    def draw_a_card(self):
-        if len(self.cards) < 100:
-            print("Reshuffling the cards")
-            self.create_shoe()
-        return self.cards.pop()
-
-class Hand:
-    def __init__(self):
-        self.cards = []
-        self.value = 0
-        self.aces = 0
-
-    def add_a_card(self, card):
-        self.cards.append(card)
-        self.value += card.value
-        if card.value == "A":
-            self.aces += 1
-        self.adjust_if_ace()
-
-    def adjust_if_ace(self):
-        while self.value > 21 and self.aces:
-            self.value -= 10
-            self.aces -= 1
-
-    def repr(self):
-        return f"Hand({self.cards}), Value: {self.value} "
-
-#Part 2
-ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "j", "Q", "K"]
-            # I don't think we need the suits, because the suits are irrelevant in blackjack since they all
-            # can have the same value in each suit.
-            # what do you think?
-
-
-            for deck in range(self.number_of_decks):
-                for rank in ranks:
-                    for suit in suits:
-                        self.cards.append(Card(rank, suit))
 class Hand:
 
       def __init__(self):
           self.number_of_cards=2
           self.cards_in_hand=[]
+          self.hand_value=0
+
+      def __len__(self):
+          return len(self.cards_in_hand)
+
+      def check_valid_hand(self):
+          return len(self.cards_in_hand)>0
+
+      def give_cards_to_hand(self):
+          shoe=Shoe()
+          shoe.create_shoe()
+          random_deck=random.randint(1,7)
+          random_card=random.randint(1,53)
+          if not self.check_valid_hand():
+             for i in range(1,3):
+                 self.cards_in_hand.append(shoe.shoe[random_deck][random_card])
+          return self.cards_in_hand
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
