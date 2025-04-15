@@ -1,5 +1,4 @@
 import random
-
 class Card:
     cards = {"Jack": 10, "King": 10, "Queen": 10,
              "10": 10, "9": 9, "8": 8, "7": 7, "6": 6,
@@ -43,7 +42,7 @@ class Shoe:
 
     def shuffle(self):
         for j_deck in enumerate(self.shoe):
-            self.card_count+=len(self.shoe[j_deck])
+           self.card_count+=len(self.shoe[j_deck])
         if self.card_count<100:
            self.create_shoe()
 
@@ -53,6 +52,8 @@ class Hand:
           self.number_of_cards=2
           self.cards_in_hand=[]
           self.hand_value=0
+          self.hand_money=1
+          self.win=False
 
       def __len__(self):
           return len(self.cards_in_hand)
@@ -66,12 +67,32 @@ class Hand:
           random_deck=random.randint(1,7)
           random_card=random.randint(1,53)
           if not self.check_valid_hand():
-             for i in range(1,3):
+             for i in range(1,self.number_of_cards):
                  self.cards_in_hand.append(shoe.shoe[random_deck][random_card])
           return self.cards_in_hand
 
+      def add_card(self,new_card):
+          self.cards_in_hand.append(new_card)
 
+      def reveal(self,card):
+          if len(self.cards_in_hand)==0:
+             return None
+          self.cards_in_hand.pop(self.cards_in_hand.index(card))
+          self.hand_value+=card.get_value_of_card()
 
+      def win_or_loss(self):
+          other=Hand()
+          if self.hand_value<21 and self.hand_value<other.hand_value:
+             self.win=True
+          elif self.hand_value>21:
+               self.win=False
+          elif other.hand_value>21:
+               self.win=True
+
+          return self.win
+
+      def money(self):
+          if self.win_or_loss():
 
 
 
