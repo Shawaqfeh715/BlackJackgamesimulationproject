@@ -1,9 +1,10 @@
 import random
 
+
 SUITS = ["Diamonds", "Hearts". "Spades", "Clubs"]
 RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 VALUES = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-          '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11
+          '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11}
 
 
 class Card:
@@ -35,6 +36,14 @@ class Deck:
                 self.cards.append(Card(suit, rank))
 
 
+      def __int__(self):
+          self.deck=[]
+
+      def make_deck(self):
+          card=Card()
+          card.type_of_card=random.randint(1,10)
+          for i in range(53):
+              self.deck.append(card)
 
 class Shoe:
     def __init__(self, number_of_decks=6):
@@ -43,6 +52,7 @@ class Shoe:
             self.create_shoe()
 
     def create_shoe(self):
+
             self.cards = []
             for card in range(self.number_of_decks):
                 deck = Deck()
@@ -80,5 +90,21 @@ class Hand:
         return f"Hand({self.cards}), Value: {self.value} "
 
 #Part 2
+ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "j", "Q", "K"]
+            # I don't think we need the suits, because the suits are irrelevant in blackjack since they all
+            # can have the same value in each suit.
+            # what do you think?
+
+
+            for deck in range(self.number_of_decks):
+                for rank in ranks:
+                    for suit in suits:
+                        self.cards.append(Card(rank, suit))
+class Hand:
+
+      def __init__(self):
+          self.number_of_cards=2
+          self.cards_in_hand=[]
+
 
 
