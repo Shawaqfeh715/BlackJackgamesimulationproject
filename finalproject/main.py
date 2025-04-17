@@ -1,31 +1,30 @@
 import random
+
 class Card:
     cards = {"Jack": 10, "King": 10, "Queen": 10,
              "10": 10, "9": 9, "8": 8, "7": 7, "6": 6,
              "5": 5, "4": 4, "3": 3, "2": 2, "Ace": 1}
 
-    def __init__(self):
+    def __init__(self,type_of_card):
         self.value_of_card = 0
-        self.type_of_card = ""
+        self.type_of_card = self.cards[type_of_card]
 
-    def _get_type_of_card(self, result):
-        if result in self.cards:
-            self.type_of_card = result
-        return self.type_of_card
-
-    def get_value_of_card(self, result):
-        self.value_of_card = self._get_type_of_card(result)
+    def get_value_of_card(self):
         return self.value_of_card
 
+    def __str__(self):
+        return self.type_of_card
+
 class Deck:
-      def __int__(self):
+      def __init__(self):
           self.deck=[]
 
       def make_deck(self):
-          card=Card()
-          card.type_of_card=random.randint(1,10)
-          for i in range(1,53):
-              self.deck.append(card)
+          ranks=list(Card.cards.keys())
+          suits=["Hearts","Diamonds","Clubs","Spades"]
+          for suit in suits:
+              for rank in ranks:
+                  self.deck.append(Card(suit))
 
 class Shoe:
 
@@ -33,27 +32,36 @@ class Shoe:
             self.number_of_decks = 6
             self.shoe = []
             self.card_count=0
+            self.create_shoe()
 
     def create_shoe(self):
-        deck=Deck()
+        self.shoe=[]
         for i in range(self.number_of_decks):
+            deck=Deck()
             deck.make_deck()
-            self.shoe.append(deck)
+            self.shoe.extend(deck.deck)
+        self.card_count=len(self.shoe)
+        self.shuffle()
 
     def shuffle(self):
-        for j_deck in enumerate(self.shoe):
-           self.card_count+=len(self.shoe[j_deck])
         if self.card_count<100:
-           self.create_shoe()
+            self.create_shoe()
+        random.shuffle(self.shoe)
+        self.card_count=len(self.shoe)
+
+    def draw_card(self):
+        if not self.shoe:
+            self.create_shoe()
+        self.card_count-=1
+        return self.shoe.pop()
 
 class Hand:
 
-      def __init__(self):
-          self.number_of_cards=2
+      def __init__(self,shoe):
+          self.shoe=shoe
           self.cards_in_hand=[]
           self.hand_value=0
-          self.hand_money=1
-          self.win=False
+          self.ace_count=0
 
       def __len__(self):
           return len(self.cards_in_hand)
@@ -61,42 +69,33 @@ class Hand:
       def check_valid_hand(self):
           return len(self.cards_in_hand)>0
 
-      def give_cards_to_hand(self):
-          shoe=Shoe()
-          shoe.create_shoe()
-          random_deck=random.randint(1,7)
-          random_card=random.randint(1,53)
-          if not self.check_valid_hand():
-             for i in range(1,self.number_of_cards):
-                 self.cards_in_hand.append(shoe.shoe[random_deck][random_card])
-          return self.cards_in_hand
-
       def add_card(self,new_card):
           self.cards_in_hand.append(new_card)
+          if new_card.type_of_card=="Ace":
+             self.ace_count+=1
+          self.hand_value+=new_card.get_value_of_card()
+          temp_value=self.hand_value
+          temp_aces=self.ace_count
+          while temp_value>21 and temp_aces>0:
+                temp_value-=10
+                temp_aces-=1
+          self.hand_value=temp_value
 
-      def reveal(self,card):
-          if len(self.cards_in_hand)==0:
-             return None
-          self.cards_in_hand.pop(self.cards_in_hand.index(card))
-          self.hand_value+=card.get_value_of_card()
+      def reveal(self):
+          return self.hand_value
 
-      def win_or_loss(self):
-          other=Hand()
-          if self.hand_value<21 and self.hand_value<other.hand_value:
-             self.win=True
-          elif self.hand_value>21:
-               self.win=False
-          elif other.hand_value>21:
-               self.win=True
+      def deal_initial_cards(self):
+          if not self.check_valid_hand():
+             for i in range(2):
+                 self.add_card(self.shoe.draw_card())
 
-          return self.win
+class Player(Hand):
 
-      def money(self):
-          if self.win_or_loss():
-
-
-
-
+      def __init__(self,shoe):
+          super().__init__(shoe)
+          self.hand_money=1
+          self.bet=0
+          self.win=None
 
 
 
