@@ -106,5 +106,40 @@ class Hand:
           self.number_of_cards=2
           self.cards_in_hand=[]
 
+class Player:
+    def __init__(self):
+        self.hand = Hand()
+
+    def hand_reset(self):
+        self.hand = Hand()
+
+class Dealer:
+    def __init__(self):
+        self.hand = Hand()
+
+    def hand_reset(self):
+        self.hand = Hand()
+
+    def show_first_card(self):
+        return str(self.hand.cards_in_hand[0])
+
+    def play(self, shoe):
+        while self.hand.value_of_hand() < 17:
+            self.hand.add_a_card_to_hand()
+
+def main():
+    shoe = Shoe()
+    player = Player()
+    dealer = Dealer()
+    balance = 0
+
+    while True:
+        if len(shoe.cards) < 100:
+            print("Reshuffling the shoe")
+            shoe = Shoe()
+
+        player.hand_reset()
+        dealer.hand_reset()
+
 
 
