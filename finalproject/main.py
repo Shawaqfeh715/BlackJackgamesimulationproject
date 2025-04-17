@@ -102,7 +102,8 @@ class Player(Hand):
           if self.reveal()>21:
               self.win=False
               return self.win
-          return True
+          self.win=True
+          return self.win
 
       def stand(self):
           pass
