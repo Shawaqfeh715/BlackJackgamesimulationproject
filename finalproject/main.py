@@ -94,27 +94,42 @@ class Player(Hand):
       def __init__(self,shoe):
           super().__init__(shoe)
           self.hand_money=1
-          self.bet=0
+          self.bet=1
           self.win=None
 
+      def hit(self):
+          self.add_card(self.shoe.draw_card())
+          if self.reveal()>21:
+              self.win=False
+              return self.win
+          return True
 
+      def stand(self):
+          pass
 
+      def resolve_bet(self,dealer):
+          dealer_value=dealer.reveal()
+          player_value=self.reveal()
+          if player_value>21:
+              self.win= False
+          elif dealer_value>21:
+               self.win = True
+          elif player_value>dealer_value:
+               self.win=True
+          elif player_value== dealer_value:
+               self.win= None
+          else:
+              self.win=False
 
+          if self.win is True:
+             self.hand_value +=self.bet*2
+          elif self.win is None:
+               self.hand_money+=self.bet
 
-
-
-
-
-
-
-
-
-class Player:
-    def __init__(self):
-        self.hand = Hand()
-
-    def hand_reset(self):
-        self.hand = Hand()
+          if self.win is False:
+             self.hand_value-=self.bet*2
+             pass
+          return self.win
 
 class Dealer:
     def __init__(self):
