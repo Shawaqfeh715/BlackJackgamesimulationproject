@@ -1,110 +1,113 @@
 import random
 
-
-SUITS = ["Diamonds", "Hearts". "Spades", "Clubs"]
-RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
-VALUES = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-          '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11}
-
-
 class Card:
+    cards = {"Jack": 10, "King": 10, "Queen": 10,
+             "10": 10, "9": 9, "8": 8, "7": 7, "6": 6,
+             "5": 5, "4": 4, "3": 3, "2": 2, "Ace": 1}
 
+    def __init__(self,type_of_card):
+        self.value_of_card = 0
+        self.type_of_card = self.cards[type_of_card]
 
-    def __init__(self, suit, rank):
-        self.suit = suit
-        self.rank = rank
-        self.value = VALUES[rank]
-
-    #repr function returns string representation
-    def __repr__(self):
-        return f"{self.rank} of {self.suit}"
-
-    def _get_type_of_card(self, result):
-        if result in self.cards:
-            self.type_of_card = result
-        return self.type_of_card
-
-    def get_value_of_card(self, result):
-        self.value_of_card = self._get_type_of_card(result)
+    def get_value_of_card(self):
         return self.value_of_card
 
+    def __str__(self):
+        return self.type_of_card
+
 class Deck:
-    def __init__(self):
-        self.cards =[]
-        for suits in SUITS:
-            for rank in RANKS:
-                self.cards.append(Card(suit, rank))
-
-
-      def __int__(self):
+      def __init__(self):
           self.deck=[]
 
       def make_deck(self):
-          card=Card()
-          card.type_of_card=random.randint(1,10)
-          for i in range(53):
-              self.deck.append(card)
+          ranks=list(Card.cards.keys())
+          suits=["Hearts","Diamonds","Clubs","Spades"]
+          for suit in suits:
+              for rank in ranks:
+                  self.deck.append(Card(suit))
 
 class Shoe:
-    def __init__(self, number_of_decks=6):
-            self.number_of_decks = number_of_decks
-            self.cards = []
+
+    def __init__(self):
+            self.number_of_decks = 6
+            self.shoe = []
+            self.card_count=0
             self.create_shoe()
 
     def create_shoe(self):
-
-            self.cards = []
-            for card in range(self.number_of_decks):
-                deck = Deck()
-                self.cards.extend(deck.cards)
-            self.shuffle()
+        self.shoe=[]
+        for i in range(self.number_of_decks):
+            deck=Deck()
+            deck.make_deck()
+            self.shoe.extend(deck.deck)
+        self.card_count=len(self.shoe)
+        self.shuffle()
 
     def shuffle(self):
-        random.shuffle(self.cards)
-
-    def draw_a_card(self):
-        if len(self.cards) < 100:
-            print("Reshuffling the cards")
+        if self.card_count<100:
             self.create_shoe()
-        return self.cards.pop()
+        random.shuffle(self.shoe)
+        self.card_count=len(self.shoe)
+
+    def draw_card(self):
+        if not self.shoe:
+            self.create_shoe()
+        self.card_count-=1
+        return self.shoe.pop()
 
 class Hand:
-    def __init__(self):
-        self.cards = []
-        self.value = 0
-        self.aces = 0
 
-    def add_a_card(self, card):
-        self.cards.append(card)
-        self.value += card.value
-        if card.value == "A":
-            self.aces += 1
-        self.adjust_if_ace()
-
-    def adjust_if_ace(self):
-        while self.value > 21 and self.aces:
-            self.value -= 10
-            self.aces -= 1
-
-    def repr(self):
-        return f"Hand({self.cards}), Value: {self.value} "
-
-#Part 2
-ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "j", "Q", "K"]
-            # I don't think we need the suits, because the suits are irrelevant in blackjack since they all
-            # can have the same value in each suit.
-            # what do you think?
-
-
-            for deck in range(self.number_of_decks):
-                for rank in ranks:
-                    for suit in suits:
-                        self.cards.append(Card(rank, suit))
-class Hand:
-
-      def __init__(self):
-          self.number_of_cards=2
+      def __init__(self,shoe):
+          self.shoe=shoe
           self.cards_in_hand=[]
+          self.hand_value=0
+          self.ace_count=0
+
+      def __len__(self):
+          return len(self.cards_in_hand)
+
+      def check_valid_hand(self):
+          return len(self.cards_in_hand)>0
+
+      def add_card(self,new_card):
+          self.cards_in_hand.append(new_card)
+          if new_card.type_of_card=="Ace":
+             self.ace_count+=1
+          self.hand_value+=new_card.get_value_of_card()
+          temp_value=self.hand_value
+          temp_aces=self.ace_count
+          while temp_value>21 and temp_aces>0:
+                temp_value-=10
+                temp_aces-=1
+          self.hand_value=temp_value
+
+      def reveal(self):
+          return self.hand_value
+
+      def deal_initial_cards(self):
+          if not self.check_valid_hand():
+             for i in range(2):
+                 self.add_card(self.shoe.draw_card())
+
+class Player(Hand):
+
+      def __init__(self,shoe):
+          super().__init__(shoe)
+          self.hand_money=1
+          self.bet=0
+          self.win=None
+
+
+
+
+
+
+
+
+
+
+
+
 
 class Player:
     def __init__(self):
