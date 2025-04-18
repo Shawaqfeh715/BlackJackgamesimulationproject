@@ -44,10 +44,11 @@ class Shoe:
         self.shuffle()
 
     def shuffle(self):
-        if self.card_count<100:
+        if self.card_count < 100:
             self.create_shoe()
         random.shuffle(self.shoe)
-        self.card_count=len(self.shoe)
+        self.card_count = len(self.shoe)
+
 
     def draw_card(self):
         if not self.shoe:
@@ -97,52 +98,64 @@ class Player(Hand):
           self.bet=0
           self.win=None
 
-
-
-
-
-
-
-
-
-
-
-
-
-class Player:
+class Dealer():
     def __init__(self):
         self.hand = Hand()
 
-    def hand_reset(self):
+    def reset_hand(self):
         self.hand = Hand()
 
-class Dealer:
-    def __init__(self):
-        self.hand = Hand()
-
-    def hand_reset(self):
-        self.hand = Hand()
-
-    def show_first_card(self):
-        return str(self.hand.cards_in_hand[0])
+    def show_initial_card(self):
+        return str(self.hand.cards[0])
 
     def play(self, shoe):
-        while self.hand.value_of_hand() < 17:
-            self.hand.add_a_card_to_hand()
+        while self.hand.get_value() < 17:
+            self.hand.add_card(shoe.deal_card())
+
+
 
 def main():
     shoe = Shoe()
     player = Player()
     dealer = Dealer()
-    balance = 0
+    balance = 1
 
     while True:
         if len(shoe.cards) < 100:
             print("Reshuffling the shoe")
-            shoe = Shoe()
+            shoe.shuffle()
+
 
         player.hand_reset()
         dealer.hand_reset()
+
+        for i in range(2):
+            player.hand.deal_initial_cards(shoe)
+            dealer.hand.deal_initial_cards(shoe)
+
+            print("New Round!")
+            print("Dealer shows: ")
+            print(f"Your hand: {player.hand}")
+
+            # Player Turn
+            while player.hand_value > 21:
+                choice = print("Would you like to Hit or Stand? ").strip().lower()
+                if choice == 'Hit':
+                    player.hand.add_card(shoe.draw_card())
+                elif choice == 'Stand':
+                    break
+                else:
+                    print("Please type 'Hit' or 'Stand'")
+
+        if player.hand_value > 21:
+            print("Busted! You lost $1")
+            balance -= 1
+
+        #Player's Turn
+        else:
+            dealer.hand
+
+
 
 
 
