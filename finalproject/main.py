@@ -151,47 +151,82 @@ class Dealer():
 
 
 
-def main():
-    shoe = Shoe()
-    player = Player()
-    dealer = Dealer()
-    balance = 1
+class Game:
+    def __init__(self):
+        self.money = 0
 
-    while True:
-        if len(shoe.cards) < 100:
-            print("Reshuffling the shoe")
-            shoe.shuffle()
+    def play_a_round(self):
+        deck = Deck()
+        player_hand = Hand()
+        dealer_hand = Hand()
 
 
-        player.hand_reset()
-        dealer.hand_reset()
 
         for i in range(2):
-            player.hand.deal_initial_cards(shoe)
-            dealer.hand.deal_initial_cards(shoe)
+            player_hand.add_card(shoe.draw_card())
+            dealer_hand.add_card(shoe.draw_card())
+
 
             print("New Round!")
-            print("Dealer shows: ")
-            print(f"Your hand: {player.hand}")
+            print("Dealer shows:", dealer_hand.cards_in_hand[0])
+            print(f"Your hand: {player_hand}")
 
             # Player Turn
-            while player.hand_value > 21:
-                choice = print("Would you like to Hit or Stand? ").strip().lower()
+            while player_hand.hand_value > 21:
+                choice = print("Would you like to Hit or Stand? ").lower()
                 if choice == 'Hit':
                     player.hand.add_card(shoe.draw_card())
+                    print("Your hand:", player_hand)
+                    if player_hand.hand_value > 21:
+                        print("Busted! You LOSE!")
+                        self.money -=1
+                        return
                 elif choice == 'Stand':
                     break
                 else:
                     print("Please type 'Hit' or 'Stand'")
 
-        if player.hand_value > 21:
-            print("Busted! You lost $1")
-            balance -= 1
+            print("Dealer's Hand:", dealer_hand)
+            while dealer_hand < 17:
+                dealer_hand.add_card(shoe.draw_card())
+                print("Dealer hits:", dealer_hand)
 
-        # Player's Turn
-        else:
-            dealer.hand
+            player_value = player_hand.hand_value
+            dealer_value = dealer_hand.hand_value
 
+            print(f"Your total: {player_value} | Dealer Total: {dealer_value}")
+
+            if dealer_value > 21 or player_value > dealer_value:
+                print("You Win!")
+                self.money += 1
+            elif dealer_value < 21 or player_value < dealer_value:
+                print("You Lose!")
+                self.money -= 1
+            else:
+                print("It's a push (tie)")
+
+    def view_balance(self):
+        print(f"Current Balance: ${self.money:2f}")
+
+def main():
+    print("Welcome to Blackjack!")
+    game = Game()
+
+    while True:
+        game.play_a_round()
+        game.view_balance()
+        again = input("Would you like to play again? (y/n): ").lower()
+        if again != 'y':
+            print(f"Thanks for playing! Final Balance is ${game.money}")
+            break
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+        
 
 
 
