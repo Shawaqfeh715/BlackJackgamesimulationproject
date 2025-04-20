@@ -1,4 +1,6 @@
 import random
+from random import choice
+
 
 class Card:
     cards = {"Jack": 10, "King": 10, "Queen": 10,
@@ -242,7 +244,39 @@ def simulate_hands(num_hands=100000):
 
         print(f"{player_val:11} | {dealer_val:12} | {hit_avg:7.2f} | {stand_avg:8.2f} | {best_strat}")
 if __name__=="__main__":
-    simulate_hands(100000)
+   print('Welcome to BlackJack!')
+   print("1 for an interactive game")
+   print("2 for a simulation")
+   choice=input('1 or 2?')
+
+   if choice=='2':
+      simulate_hands(100000)
+   else:
+        shoe=Shoe()
+        player=Player(shoe)
+        dealer=Dealer(shoe)
+
+        while True:
+              print(f'\nYour Money: ${player.hand_money}')
+              play=input("Enter to bet $1 or q to quit:")
+              if play.lower()=="q":
+                 print("bye")
+                 break
+              if not player.place_bet():
+                 print("Insufficient funds! resetting to $1.")
+                 player.hand_money=1
+                 player.place_bet()
+
+              player.reset()
+              dealer.cards_in_hand=[]
+              dealer.hand_value=0
+              dealer.ace_count=0
+              player.deal_initial_cards()
+              dealer.deal_initial_cards()
+
+              
+
+
 
 
 
