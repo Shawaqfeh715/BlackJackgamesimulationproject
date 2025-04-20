@@ -1,12 +1,13 @@
 import random
+
 class Card:
     cards = {"Jack": 10, "King": 10, "Queen": 10,
              "10": 10, "9": 9, "8": 8, "7": 7, "6": 6,
-             "5": 5, "4": 4, "3": 3, "2": 2, "Ace": 1}
+             "5": 5, "4": 4, "3": 3, "2": 2, "Ace": 11}
 
     def __init__(self,type_of_card):
-        self.value_of_card = 0
-        self.type_of_card = self.cards[type_of_card]
+        self.value_of_card = self.cards[type_of_card]
+        self.type_of_card = type_of_card
 
     def get_value_of_card(self):
         return self.value_of_card
@@ -23,7 +24,7 @@ class Deck:
           suits=["Hearts","Diamonds","Clubs","Spades"]
           for suit in suits:
               for rank in ranks:
-                  self.deck.append(Card(suit))
+                  self.deck.append(Card(rank))
 
 class Shoe:
 
@@ -117,25 +118,34 @@ class Player(Hand):
       def resolve_bet(self,dealer):
           dealer_value=dealer.reveal()
           player_value=self.reveal()
+
           if player_value>21:
              self.win= False
           elif dealer_value>21:
               self.win=True
           elif player_value==dealer_value:
                self.win= None
+          elif player_value>dealer_value:
+               self.win=True
           else:
               self.win=False
 
+          money_change=0
           if self.win is True:
-             self.hand_value+=self.bet*2
+             money_change=self.bet*2
+             self.hand_money+=money_change
           elif self.win is None:
-              self.hand_money+=self.bet
+              money_change=self.bet
+              self.hand_money+=money_change
           self.bet=0
-          return self.win
+          return self.win,money_change
 
       def reset(self):
           self.win=None
           self.bet=0
+          self.cards_in_hand=[]
+          self.hand_value=0
+          self.ace_count=0
           if self.hand_money<1:
              self.hand_money=1
 
@@ -146,7 +156,7 @@ class Dealer(Hand):
 
       def reveal_one_card(self):
           if self.cards_in_hand:
-              return str(self.cards_in_hand[0])
+              return self.cards_in_hand[0]
           return None
 
       def play_turn(self):
@@ -162,12 +172,24 @@ def simulate_hands(num_hands=100000):
     results={}
     for k in range(num_hands):
         player.reset()
-        player.place_bet()
+        dealer.cards_in_hand=[]
+        dealer.hand_value=0
+        dealer.ace_count=0
+
+        if not player.place_bet():
+           break
+
         player.deal_initial_cards()
         dealer.deal_initial_cards()
+
         player_value=player.reveal()
         dealer_upcard=dealer.reveal_one_card()
+
+        if dealer_upcard is None:
+            continue
+
         dealer_upcard_value=Card.get_value_of_card(dealer_upcard)
+
         action=random.choice(['hit','stand'])
 
         key=(player_value,dealer_upcard_value)
@@ -177,7 +199,51 @@ def simulate_hands(num_hands=100000):
                 'stand':{'money': [], 'count':0}
             }
 
-        
+        if action =='hit':
+            player.hit()
+        else:
+             player.stand()
+
+        if player.reveal()<=21:
+            dealer.play_turn()
+
+        _,money_change=player.resolve_bet(dealer)
+
+        results[key][action]['money'].append(money_change-1)
+        results[key][action]['count']+=1
+
+        print("\nResults Table: Average Money Change ($1 bet)")
+        print("Player Value| Dealer Upcard| Hit Avg| Stand Avg| Best strat")
+        print("-"*60)
+        hit_avg=0
+        stand_avg=0
+        best_strat=''
+        for (player_val,dealer_val), actions in sorted(results.items()):
+            if actions['hit']['count']>0:
+               hit_avg=sum(actions['hit']['money'])/actions['hit']['count']
+            else:
+                hit_avg=0
+
+            if actions['stand']['count']>0:
+                stand_avg=sum(actions['stand']['money'])/actions['stand']['count']
+            else:
+                stand_avg=0
+
+            if hit_avg>stand_avg:
+                best_strat='Hit'
+            elif hit_avg<stand_avg:
+                 best_strat='Stand'
+            else:
+                 best_strat='Tie'
+
+            print(f"{player_val:11}|{dealer_val:12}|{hit_avg:7.2f}|{stand_avg:8.2f}|{best_strat}")
+
+
+if __name__=="__main__":
+    simulate_hands(100000)
+
+
+
 
 
 
