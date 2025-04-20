@@ -170,7 +170,8 @@ def simulate_hands(num_hands=100000):
     dealer=Dealer(shoe)
 
     results={}
-    for k in range(num_hands):
+    k=0
+    while k < num_hands:
         player.reset()
         dealer.cards_in_hand=[]
         dealer.hand_value=0
@@ -186,6 +187,7 @@ def simulate_hands(num_hands=100000):
         dealer_upcard=dealer.reveal_one_card()
 
         if dealer_upcard is None:
+            k+=1
             continue
 
         dealer_upcard_value=Card.get_value_of_card(dealer_upcard)
@@ -211,34 +213,34 @@ def simulate_hands(num_hands=100000):
 
         results[key][action]['money'].append(money_change-1)
         results[key][action]['count']+=1
+        k+=1
 
-        print("\nResults Table: Average Money Change ($1 bet)")
-        print("Player Value| Dealer Upcard| Hit Avg| Stand Avg| Best strat")
-        print("-"*60)
-        hit_avg=0
-        stand_avg=0
-        best_strat=''
-        for (player_val,dealer_val), actions in sorted(results.items()):
-            if actions['hit']['count']>0:
-               hit_avg=sum(actions['hit']['money'])/actions['hit']['count']
-            else:
-                hit_avg=0
+    print("\nResults Table: Average Money Change ($1 bet)")
+    print("Player Value| Dealer Upcard| Hit Avg| Stand Avg| Best strat")
+    print("-"*60)
 
-            if actions['stand']['count']>0:
-                stand_avg=sum(actions['stand']['money'])/actions['stand']['count']
-            else:
-                stand_avg=0
+    hit_avg=0
+    stand_avg=0
+    best_strat=''
+    for (player_val,dealer_val), actions in sorted(results.items()):
+        if actions['hit']['count']>0:
+           hit_avg=sum(actions['hit']['money'])/actions['hit']['count']
+        else:
+            hit_avg=0
 
-            if hit_avg>stand_avg:
-                best_strat='Hit'
-            elif hit_avg<stand_avg:
-                 best_strat='Stand'
-            else:
-                 best_strat='Tie'
+        if actions['stand']['count']>0:
+            stand_avg=sum(actions['stand']['money'])/actions['stand']['count']
+        else:
+            stand_avg=0
 
-            print(f"{player_val:11}|{dealer_val:12}|{hit_avg:7.2f}|{stand_avg:8.2f}|{best_strat}")
+        if hit_avg>stand_avg:
+            best_strat='Hit'
+        elif hit_avg<stand_avg:
+             best_strat='stand'
+        else:
+             best_strat='Tie'
 
-
+        print(f"{player_val:11} | {dealer_val:12} | {hit_avg:7.2f} | {stand_avg:8.2f} | {best_strat}")
 if __name__=="__main__":
     simulate_hands(100000)
 
