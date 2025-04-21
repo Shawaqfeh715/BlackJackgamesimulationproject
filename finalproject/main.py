@@ -1,7 +1,6 @@
 import random
 from random import choice
 
-
 class Card:
     cards = {"Jack": 10, "King": 10, "Queen": 10,
              "10": 10, "9": 9, "8": 8, "7": 7, "6": 6,
@@ -274,7 +273,49 @@ if __name__=="__main__":
               player.deal_initial_cards()
               dealer.deal_initial_cards()
 
-              
+              player_hand=[]
+              for card in player.cards_in_hand:
+                  player_hand.append(str(card))
+                  print("Player\'s hand:", player_hand, "Value:", player.reveal())
+                  print("Dealer\'s up card:", dealer.reveal_one_card())
+
+              while player.reveal()<=21:
+                    action=input("Hit or stand? H for hit and S for stand").lower()
+                    if action=='h':
+                       if not player.hit():
+                          print("You bust! Hand Value:", player.reveal())
+                       player_hand=[]
+                       for card in player.cards_in_hand:
+                           player_hand.append(str(card))
+                       print("Player\'s hand:",player_hand,"Value:",player.reveal())
+                    elif action=='s':
+                         player.stand()
+                         break
+                    else:
+                        print("Invalid input")
+
+              if player.reveal()<=21:
+                 dealer.play_turn()
+                 dealer_hand=[]
+                 for card in dealer.cards_in_hand:
+                     dealer_hand.append(str(card))
+
+              result,_=player.resolve_bet(dealer)
+
+              end=''
+              if result is True:
+                  end='Win'
+              elif result is None:
+                   end='Draw'
+              else:
+                   end='Loss'
+              print('Result:',end)
+              print('your money:',player.hand_money)
+
+
+
+
+
 
 
 
