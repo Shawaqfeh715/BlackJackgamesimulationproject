@@ -1,13 +1,14 @@
 import random
+from random import choice
 
 class Card:
     cards = {"Jack": 10, "King": 10, "Queen": 10,
              "10": 10, "9": 9, "8": 8, "7": 7, "6": 6,
-             "5": 5, "4": 4, "3": 3, "2": 2, "Ace": 1}
+             "5": 5, "4": 4, "3": 3, "2": 2, "Ace": 11}
 
     def __init__(self,type_of_card):
-        self.value_of_card = 0
-        self.type_of_card = self.cards[type_of_card]
+        self.value_of_card = self.cards[type_of_card]
+        self.type_of_card = type_of_card
 
     def get_value_of_card(self):
         return self.value_of_card
@@ -24,7 +25,7 @@ class Deck:
           suits=["Hearts","Diamonds","Clubs","Spades"]
           for suit in suits:
               for rank in ranks:
-                  self.deck.append(Card(suit))
+                  self.deck.append(Card(rank))
 
 class Shoe:
 
@@ -95,24 +96,22 @@ class Player(Hand):
       def __init__(self,shoe):
           super().__init__(shoe)
           self.hand_money=1
-          self.bet=1
+          self.bet=0
           self.win=None
 
-
-class Dealer():
-    def __init__(self):
-        self.hand = Hand()
-
-    def reset_hand(self):
-        self.hand = Hand()
+      def place_bet(self):
+          if 1 <= self.hand_money:
+             self.bet=1
+             self.hand_money-=1
+             return True
+          return False
 
       def hit(self):
           self.add_card(self.shoe.draw_card())
           if self.reveal()>21:
-              self.win=False
-              return self.win
-          self.win=True
-          return self.win
+             self.win= False
+             return False
+          return True
 
       def stand(self):
           pass
@@ -120,108 +119,214 @@ class Dealer():
       def resolve_bet(self,dealer):
           dealer_value=dealer.reveal()
           player_value=self.reveal()
+
           if player_value>21:
-              self.win= False
+             self.win= False
           elif dealer_value>21:
-               self.win = True
+              self.win=True
+          elif player_value==dealer_value:
+               self.win= None
           elif player_value>dealer_value:
                self.win=True
-          elif player_value== dealer_value:
-               self.win= None
           else:
               self.win=False
 
+          money_change=0
           if self.win is True:
-             self.hand_value +=self.bet*2
+             money_change=self.bet*2
+             self.hand_money+=money_change
           elif self.win is None:
-               self.hand_money+=self.bet
+              money_change=self.bet
+              self.hand_money+=money_change
+          self.bet=0
+          return self.win,money_change
 
-          if self.win is False:
-             self.hand_value-=self.bet*2
-             pass
-          return self.win
+      def reset(self):
+          self.win=None
+          self.bet=0
+          self.cards_in_hand=[]
+          self.hand_value=0
+          self.ace_count=0
+          if self.hand_money<1:
+             self.hand_money=1
+
+class Dealer(Hand):
+
+      def __init__(self,shoe):
+          super().__init__(shoe)
+
+      def reveal_one_card(self):
+          if self.cards_in_hand:
+              return self.cards_in_hand[0]
+          return None
+
+      def play_turn(self):
+          while self.reveal()<17:
+                self.add_card(self.shoe.draw_card())
+          return self.reveal()
+
+def simulate_hands(num_hands=100000):
+    shoe=Shoe()
+    player=Player(shoe)
+    dealer=Dealer(shoe)
+
+    results={}
+    k=0
+    while k < num_hands:
+        player.reset()
+        dealer.cards_in_hand=[]
+        dealer.hand_value=0
+        dealer.ace_count=0
+
+        if not player.place_bet():
+           break
+
+        player.deal_initial_cards()
+        dealer.deal_initial_cards()
+
+        player_value=player.reveal()
+        dealer_upcard=dealer.reveal_one_card()
+
+        if dealer_upcard is None:
+            k+=1
+            continue
+
+        dealer_upcard_value=Card.get_value_of_card(dealer_upcard)
+
+        action=random.choice(['hit','stand'])
+
+        key=(player_value,dealer_upcard_value)
+        if key not in results:
+            results[key]={
+                'hit':{'money':[],'count':0},
+                'stand':{'money': [], 'count':0}
+            }
+
+        if action =='hit':
+            player.hit()
+        else:
+             player.stand()
+
+        if player.reveal()<=21:
+            dealer.play_turn()
+
+        _,money_change=player.resolve_bet(dealer)
+
+        results[key][action]['money'].append(money_change-1)
+        results[key][action]['count']+=1
+        k+=1
+
+    print("\nResults Table: Average Money Change ($1 bet)")
+    print("Player Value| Dealer Upcard| Hit Avg| Stand Avg| Best strat")
+    print("-"*60)
+
+    hit_avg=0
+    stand_avg=0
+    best_strat=''
+    for (player_val,dealer_val), actions in sorted(results.items()):
+        if actions['hit']['count']>0:
+           hit_avg=sum(actions['hit']['money'])/actions['hit']['count']
+        else:
+            hit_avg=0
+
+        if actions['stand']['count']>0:
+            stand_avg=sum(actions['stand']['money'])/actions['stand']['count']
+        else:
+            stand_avg=0
+
+        if hit_avg>stand_avg:
+            best_strat='Hit'
+        elif hit_avg<stand_avg:
+             best_strat='stand'
+        else:
+             best_strat='Tie'
+
+        print(f"{player_val:11} | {dealer_val:12} | {hit_avg:7.2f} | {stand_avg:8.2f} | {best_strat}")
+if __name__=="__main__":
+   print('Welcome to BlackJack!')
+   print("1 for an interactive game")
+   print("2 for a simulation")
+   choice=input('1 or 2?')
+
+   if choice=='2':
+      simulate_hands(100000)
+   else:
+        shoe=Shoe()
+        player=Player(shoe)
+        dealer=Dealer(shoe)
+
+        while True:
+              print(f'\nYour Money: ${player.hand_money}')
+              play=input("Enter to bet $1 or q to quit:")
+              if play.lower()=="q":
+                 print("bye")
+                 break
+              if not player.place_bet():
+                 print("Insufficient funds! resetting to $1.")
+                 player.hand_money=1
+                 player.place_bet()
+
+              player.reset()
+              dealer.cards_in_hand=[]
+              dealer.hand_value=0
+              dealer.ace_count=0
+              player.deal_initial_cards()
+              dealer.deal_initial_cards()
+
+              player_hand=[]
+              for card in player.cards_in_hand:
+                  player_hand.append(str(card))
+                  print("Player\'s hand:", player_hand, "Value:", player.reveal())
+                  print("Dealer\'s up card:", dealer.reveal_one_card())
+
+              while player.reveal()<=21:
+                    action=input("Hit or stand? H for hit and S for stand").lower()
+                    if action=='h':
+                       if not player.hit():
+                          print("You bust! Hand Value:", player.reveal())
+                       player_hand=[]
+                       for card in player.cards_in_hand:
+                           player_hand.append(str(card))
+                       print("Player\'s hand:",player_hand,"Value:",player.reveal())
+                    elif action=='s':
+                         player.stand()
+                         break
+                    else:
+                        print("Invalid input")
+
+              if player.reveal()<=21:
+                 dealer.play_turn()
+                 dealer_hand=[]
+                 for card in dealer.cards_in_hand:
+                     dealer_hand.append(str(card))
+
+              result,_=player.resolve_bet(dealer)
+
+              end=''
+              if result is True:
+                  end='Win'
+              elif result is None:
+                   end='Draw'
+              else:
+                   end='Loss'
+              print('Result:',end)
+              print('your money:',player.hand_money)
 
 
-    def show_initial_card(self):
-        return str(self.hand.cards[0])
-
-    def play(self, shoe):
-        while self.hand.get_value() < 17:
-            self.hand.add_card(shoe.deal_card())
 
 
 
-class Game:
-    def __init__(self):
-        self.money = 0
-
-    def play_a_round(self):
-        deck = Deck()
-        player_hand = Hand()
-        dealer_hand = Hand()
 
 
 
-        for i in range(2):
-            player_hand.add_card(shoe.draw_card())
-            dealer_hand.add_card(shoe.draw_card())
 
 
-            print("New Round!")
-            print("Dealer shows:", dealer_hand.cards_in_hand[0])
-            print(f"Your hand: {player_hand}")
 
-            # Player Turn
-            while player_hand.hand_value > 21:
-                choice = print("Would you like to Hit or Stand? ").lower()
-                if choice == 'Hit':
-                    player.hand.add_card(shoe.draw_card())
-                    print("Your hand:", player_hand)
-                    if player_hand.hand_value > 21:
-                        print("Busted! You LOSE!")
-                        self.money -=1
-                        return
-                elif choice == 'Stand':
-                    break
-                else:
-                    print("Please type 'Hit' or 'Stand'")
 
-            print("Dealer's Hand:", dealer_hand)
-            while dealer_hand < 17:
-                dealer_hand.add_card(shoe.draw_card())
-                print("Dealer hits:", dealer_hand)
 
-            player_value = player_hand.hand_value
-            dealer_value = dealer_hand.hand_value
 
-            print(f"Your total: {player_value} | Dealer Total: {dealer_value}")
 
-            if dealer_value > 21 or player_value > dealer_value:
-                print("You Win!")
-                self.money += 1
-            elif dealer_value < 21 or player_value < dealer_value:
-                print("You Lose!")
-                self.money -= 1
-            else:
-                print("It's a push (tie)")
 
-    def view_balance(self):
-        print(f"Current Balance: ${self.money:2f}")
-
-def main():
-    print("Welcome to Blackjack!")
-    game = Game()
-
-    while True:
-        game.play_a_round()
-        game.view_balance()
-        again = input("Would you like to play again? (y/n): ").lower()
-        if again != 'y':
-            print(f"Thanks for playing! Final Balance is ${game.money}")
-            break
-
-if __name__ == "__main__":
-    main()
 
 
 
